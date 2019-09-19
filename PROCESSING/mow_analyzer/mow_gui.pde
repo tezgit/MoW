@@ -130,7 +130,7 @@ PFont pfont = createFont("Arial",20,true); // use true/false for smooth/no-smoot
      ;
 
 
-      cp5.addScrollableList("curredge")
+     cp5.addScrollableList("curredge")
      .setPosition(pX, pY+150)
      .setSize(70, 150)
      .setBarHeight(20)
@@ -140,11 +140,11 @@ PFont pfont = createFont("Arial",20,true); // use true/false for smooth/no-smoot
      // .setType(ScrollableList.LIST) // currently supported DROPDOWN and LIST
      ;
      
-   cp5.get(ScrollableList.class, "curredge").setType(ControlP5.DROPDOWN);
-   cp5.get(ScrollableList.class, "curredge").close();
-   cp5.get(ScrollableList.class, "curredge").setColorBackground(#008080); 
-   cp5.get(ScrollableList.class, "curredge").setColor(c); 
-
+     cp5.get(ScrollableList.class, "curredge").setType(ControlP5.DROPDOWN);
+     cp5.get(ScrollableList.class, "curredge").close();
+     cp5.get(ScrollableList.class, "curredge").setColorBackground(#008080); 
+     cp5.get(ScrollableList.class, "curredge").setColor(c); 
+  
 
      
      
@@ -158,12 +158,69 @@ PFont pfont = createFont("Arial",20,true); // use true/false for smooth/no-smoot
      // .setType(ScrollableList.LIST) // currently supported DROPDOWN and LIST
      ;
      
-   cp5.get(ScrollableList.class, "currblend").setType(ControlP5.DROPDOWN);
-   cp5.get(ScrollableList.class, "currblend").close();
-   cp5.get(ScrollableList.class, "currblend").setColorBackground(#008080); 
-   cp5.get(ScrollableList.class, "currblend").setColor(c); 
+     cp5.get(ScrollableList.class, "currblend").setType(ControlP5.DROPDOWN);
+     cp5.get(ScrollableList.class, "currblend").close();
+     cp5.get(ScrollableList.class, "currblend").setColorBackground(#008080); 
+     cp5.get(ScrollableList.class, "currblend").setColor(c); 
   
     
+     mainLabel = cp5.addTextlabel("bloblabel")
+    .setText("BLOBS")
+    .setPosition(pX, pY+250)
+    .setColorValue(color(200,200,200))
+    .setFont(font12)
+    //.setColorValue(0x000000ff)
+    ;
+
+      // Slider for blobthresh
+      cp5.addSlider("blobthresh")
+      .setLabel("threshold")
+      .setPosition(pX, pY+280)
+      .setRange(0, 10)
+      .setColorValue(color(255))
+      .setColorActive(color(0,100,0))
+      .setColorForeground(color(0,100,0))
+      .setColorBackground(color(77,77,77, 90))
+      .setValue(0.2)
+     ;
+
+      // Slider for bloblur
+      cp5.addSlider("bloblur")
+      .setLabel("blur")
+      .setPosition(pX, pY+300)
+      .setRange(0, 50)
+      .setColorValue(color(255))
+      .setColorActive(color(0,100,0))
+      .setColorForeground(color(0,100,0))
+      .setColorBackground(color(77,77,77, 90))
+      .setValue(0.2)
+     ;
+
+
+      cp5.addToggle("blobblobFlag")
+     .setPosition(pX,pY + 330)
+     .setSize(30,10)
+     .setValue(true)
+     .setMode(ControlP5.SWITCH)
+     .setColorBackground(color(77,77,77, 90))
+     .setColorActive(color(0,200,0))
+     ;
+
+      cp5.addToggle("blobedgeFlag")
+     .setPosition(pX + 70,pY + 330)
+     .setSize(30,10)
+     .setValue(true)
+     .setMode(ControlP5.SWITCH)
+     .setColorBackground(color(77,77,77, 90))
+     .setColorActive(color(0,200,0))
+     ;
+
+    
+//float blobthresh = 0.2f;
+//int bloblur = 2;
+//boolean blobblobFlag = true;
+//boolean blobedgeFlag = true;
+
   
        
   /*
@@ -191,8 +248,7 @@ void controlEvent(ControlEvent theEvent) {
      the controller() methods
   */
   
-  if(theEvent.isController()) { 
-    
+  if(theEvent.isController()) {    
     String cc="control event from : "+theEvent.controller().getName();
     pEvent=theEvent.controller().getName();
     float vv = theEvent.controller().getValue();
@@ -218,6 +274,7 @@ void controlEvent(ControlEvent theEvent) {
            cp5.getController("sdraw").setColorActive(color(0,200,0));     
            }
       } 
+     
      if(theEvent.controller().getName()=="ldraw") {
        
            if (vv==0){ 
@@ -227,7 +284,24 @@ void controlEvent(ControlEvent theEvent) {
            }
       }
 
-    
+      if(theEvent.controller().getName()=="blobblobFlag") {
+       
+           if (vv==0){ 
+             cp5.getController("blobblobFlag").setColorActive(color(200,0,0));
+           } else{
+           cp5.getController("blobblobFlag").setColorActive(color(0,200,0));     
+           }
+      }
+
+       if(theEvent.controller().getName()=="blobedgeFlag") {
+       
+           if (vv==0){ 
+             cp5.getController("blobedgeFlag").setColorActive(color(200,0,0));
+           } else{
+           cp5.getController("blobedgeFlag").setColorActive(color(0,200,0));     
+           }
+      }
+  
     
     // check if gradient button is pushed
      if(theEvent.controller().getName()=="gradbut") {
@@ -309,7 +383,12 @@ void hideControls(){
  cp5.getController("curredge").hide(); 
  cp5.getController("currblend").hide(); 
  cp5.getController("cannyprm1").hide();  
- cp5.getController("cannyprm2").hide();   
+ cp5.getController("cannyprm2").hide(); 
+ cp5.getController("bloblabel").hide(); 
+ cp5.getController("blobthresh").hide(); 
+ cp5.getController("bloblur").hide(); 
+ cp5.getController("blobblobFlag").hide(); 
+ cp5.getController("blobedgeFlag").hide(); 
 }
 
 //////////////////////////
@@ -324,4 +403,11 @@ void showControls(){
  cp5.getController("currblend").show(); 
  cp5.getController("cannyprm1").show();  
  cp5.getController("cannyprm2").show();  
+ cp5.getController("bloblabel").show(); 
+ cp5.getController("blobthresh").show(); 
+ cp5.getController("bloblur").show(); 
+ cp5.getController("blobblobFlag").show(); 
+ cp5.getController("blobedgeFlag").show(); 
+
+
 }

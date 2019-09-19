@@ -4,8 +4,10 @@ import com.hamoid.*;
 import java.util.*;  // needed for List
 // import at.mukprojects.imageloader.image.*;
 
+
 VideoExport videoExport;
 boolean LIVECAMERA =false;
+boolean newFrame=false;
 
 OpenCV opencv;
 Histogram grayHist, rHist, gHist, bHist;
@@ -15,6 +17,7 @@ Movie myMovie;
 boolean mp = true;
 boolean vidposFlag = false;
 boolean imgFlag = true;
+boolean blobFlag = false;
 
 PFont f;
 int jumpunit = 20;
@@ -105,7 +108,7 @@ void setup() {
 
   // MOVE INIT
   if (!LIVECAMERA){
-      myMovie = new Movie(this, sketchPath+"full-mow-720.mp4");
+      myMovie = new Movie(this, sketchPath+"MOW_720.mp4");
       myMovie.loop();
       opencv = new OpenCV(this, myMovie.width, myMovie.height);
       // opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
@@ -125,17 +128,25 @@ void setup() {
    videobuffer.pixels = myMovie.pixels;  
    videobuffer.updatePixels();
    
-   loadPixels();
-
+    
+   initBlobby();
+   
 }
 
 
 //////////////////////////////////////////////
 void draw() {
     background(0);
-   
-    videobuffer.pixels = myMovie.pixels;  
-   
+
+  if(myMovie.time() > 0){
+    
+   // loadPixels();
+   myMovie.loadPixels(); // Make its pixels[] array available
+   myMovie.updatePixels();
+
+ 
+   videobuffer.pixels = myMovie.pixels;     
+    
   //   image( opencv.getOutput(), 0, 0);
    
   // if(LIVECAMERA){cam.read();}
@@ -144,15 +155,12 @@ void draw() {
        int x = (width - myMovie.width) / 2;
        int y = (height - myMovie.height) / 2;   
        if(imgFlag){image(myMovie, x, y);} // display movie
-
-      //  opencv.loadImage(videobuffer); 
-       opencv = new OpenCV(this, myMovie);
-
-       
-      //  if(myMovie.time() > 1){ }
-         
   
-   
+    
+      loadPixels();
+     //opencv.loadImage(myMovie); 
+      opencv = new OpenCV(this, myMovie);
+  
     if(console){translate(0,0); showConsole();}
  
        if(contourFlag){displayContour();} // display openCV CONTOUR
@@ -165,6 +173,8 @@ void draw() {
        
        if(histoFlag){drawHisto();} // display openCV HISTOGRAM
 
+       if(blobFlag){blobby();} // display BLOBS
+       
        if(helpFlag){displayHelp(); displayVideoPos();} // display HELP
 
 
@@ -173,8 +183,7 @@ void draw() {
             //videoExport.saveFrame();// record video
             //videoExport.saveFrame();// record video
             }    
-
-
+  }
 
 }
 
@@ -185,7 +194,7 @@ void displayHelp(){
   
    // --- HELP window ---
   noStroke();
-  fill(0,0,0,histoAlpha); 
+  fill(0,0,60,150); 
   rect(helpMargin, helpMargin, width-helpMargin*2,height-helpMargin*2);
   
   String helptext = "";
@@ -436,15 +445,16 @@ void keyPressed(){
    else if (key == 'k' ) { // toggle console
       console = !(console);
    }
+   
+   else if (key == 'b' ) { // toggle console
+      blobFlag = !(blobFlag);
+   }
  
 }
-
-
-
 
 
 /////////////////////////////////////////////
 void movieEvent(Movie myMovie) {
   myMovie.read();
-  myMovie.loadPixels(); // Make its pixels[] array available
+ // myMovie.loadPixels(); // Make its pixels[] array available
 }

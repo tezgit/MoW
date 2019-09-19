@@ -58,10 +58,9 @@ void oscEvent(OscMessage theOscMessage) {
   //print(" addrpattern: "+theOscMessage.addrPattern());
   //println(" typetag: "+theOscMessage.typetag());
   
-  // parsing message
-  
- if(theOscMessage.checkAddrPattern("/tresh")==true) {
-         
+     // parsing messages
+    /////  
+ if(theOscMessage.checkAddrPattern("/tresh")==true) {         
       if(theOscMessage.checkTypetag("fff")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           oscparams[1] = theOscMessage.get(1).floatValue(); 
@@ -74,118 +73,146 @@ void oscEvent(OscMessage theOscMessage) {
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           threshy = int(oscparams[0]);       
          // TezOrbGen(oscparams[0], oscparams[1], oscparams[2]);
-          println("thresh received with params " + oscparams[0] );
-      
+          println("thresh received with params " + oscparams[0] );      
       }     
    }
-   
-   
-       else if(theOscMessage.checkAddrPattern("/contourFlag")==true) {
-         
+     
+    /////  
+     else if(theOscMessage.checkAddrPattern("/contourFlag")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           contourFlag = parseBoolean(int(oscparams[0]));     
           println("contourFlag received with params " + oscparams[0] );
-      }
-      
+      }      
     }
- 
-    else if(theOscMessage.checkAddrPattern("/edgesFlag")==true) {
-         
+
+    /////   
+     else if(theOscMessage.checkAddrPattern("/edgesFlag")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           edgesFlag = parseBoolean(int(oscparams[0]));     
           println("edgesFlag received with params " + oscparams[0] );
-      }
-      
+      }      
     }
  
-    else if(theOscMessage.checkAddrPattern("/histoFlag")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/histoFlag")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           histoFlag = parseBoolean(int(oscparams[0]));     
           println("histoFlag received with params " + oscparams[0] );
-      }
-      
+      }      
     }
  
-    else if(theOscMessage.checkAddrPattern("/cdraw")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/cdraw")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           cdraw = int(oscparams[0]);     
           println("cdraw received with params " + oscparams[0] );
-      }
-      
+      }      
     }
  
-     else if(theOscMessage.checkAddrPattern("/sdraw")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/sdraw")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           sdraw = int(oscparams[0]);     
           println("sdraw received with params " + oscparams[0] );
-      }
-      
+      }      
     }
     
-    else if(theOscMessage.checkAddrPattern("/ldraw")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/ldraw")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           ldraw = int(oscparams[0]);     
           println("ldraw received with params " + oscparams[0] );
-      }
-      
+      }      
     }
     
-    else if(theOscMessage.checkAddrPattern("/cannyprm1")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/cannyprm1")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           cannyprm1 = int(oscparams[0]);     
           println("cannyprm1 received with params " + oscparams[0] );
-      }
-      
+      }      
     }
 
-    
-     else if(theOscMessage.checkAddrPattern("/cannyprm2")==true) {
-         
+    /////    
+     else if(theOscMessage.checkAddrPattern("/cannyprm2")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           cannyprm2 = int(oscparams[0]);     
           println("cannyprm2 received with params " + oscparams[0] );
-      }
-      
+      }     
     }
 
-     else if(theOscMessage.checkAddrPattern("/curredge")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/curredge")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           curredge = int(oscparams[0]);     
           println("curredge received with params " + oscparams[0] );
-      }
-      
+      }      
     }
 
-     else if(theOscMessage.checkAddrPattern("/currblend")==true) {
-         
+    /////
+     else if(theOscMessage.checkAddrPattern("/currblend")==true) {         
       if(theOscMessage.checkTypetag("f")) {     
           oscparams[0] = theOscMessage.get(0).floatValue(); 
           currblend = int(oscparams[0]);     
           println("currblend received with params " + oscparams[0] );
-      }
-      
+        }
+     }
+ 
+ 
+ 
+    /////      
+     else if(theOscMessage.checkAddrPattern("/blobFlag")==true) {         
+      if(theOscMessage.checkTypetag("f")) {     
+          oscparams[0] = theOscMessage.get(0).floatValue(); 
+          blobFlag = parseBoolean(int(oscparams[0]));     
+          println("blobFlag received with params " + oscparams[0] );
+        }     
+    }
+ 
+    /////      
+     else if(theOscMessage.checkAddrPattern("/blobblobFlag")==true) {         
+      if(theOscMessage.checkTypetag("f")) {     
+          oscparams[0] = theOscMessage.get(0).floatValue(); 
+          blobblobFlag = parseBoolean(int(oscparams[0]));     
+          println("blobblobFlag received with params " + oscparams[0] );
+        }     
     }
 
+    /////      
+     else if(theOscMessage.checkAddrPattern("/blobedgeFlag")==true) {         
+      if(theOscMessage.checkTypetag("f")) {     
+          oscparams[0] = theOscMessage.get(0).floatValue(); 
+          blobedgeFlag = parseBoolean(int(oscparams[0]));     
+          println("blobedgeFlag received with params " + oscparams[0] );
+        }     
+    }
 
-
-
-
-
+    /////
+     else if(theOscMessage.checkAddrPattern("/blobthresh")==true) {         
+      if(theOscMessage.checkTypetag("f")) {     
+          oscparams[0] = theOscMessage.get(0).floatValue(); 
+          blobthresh = int(oscparams[0]);     
+          println("blobthresh received with params " + oscparams[0] );
+      }      
+    }
+    
+    /////
+     else if(theOscMessage.checkAddrPattern("/bloblur")==true) {         
+      if(theOscMessage.checkTypetag("f")) {     
+          oscparams[0] = theOscMessage.get(0).floatValue(); 
+          bloblur = int(oscparams[0]);     
+          println("bloblur received with params " + oscparams[0] );
+      }      
+    }
     
        
  

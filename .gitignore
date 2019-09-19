@@ -31,6 +31,7 @@ Temporary Items
 .apdisk
 
 #TeZ MoW local project ignore files
-.mp4
+*.mp4
+*.mov
 
 # End of https://www.gitignore.io/api/macos
