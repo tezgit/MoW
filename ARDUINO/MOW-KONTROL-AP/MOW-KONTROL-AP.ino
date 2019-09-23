@@ -484,6 +484,21 @@ void on_rand(OSCMessage &msg, int addrOffset) {
 }
 
 
+///////////////////////////////
+void on_motortest(OSCMessage &msg, int addrOffset) {
+ 
+// if(msg.isInt(0)){
+//      pixrand = msg.getInt(0);
+//    }
+
+    Motorlooptest();
+
+    Serial.println("OSC MESSAGE motortest" + pixrand);
+ 
+  
+}
+
+
 
 ///////////////////////////////
 void randpix(){
@@ -569,7 +584,8 @@ void osc_message_pump() {
       in.route("/netmotor/down", on_motordown);
       in.route("/netmotor/x5", on_motorx5);
       in.route("/netmotor/x100", on_motorx100);
-      in.route("/netmotor/x1000", on_motorx1000);     
+      in.route("/netmotor/x1000", on_motorx1000);  
+      in.route("/netmotor/test", on_motortest);     
     }
 
      Serial.println("OSC MESSAGE RECEIVED");

@@ -91,9 +91,13 @@ void keyPressed(){
    }
 
    else if (key == 'z' ) { // toggle Average
+      noCursor();
       zoomFlag = !(zoomFlag);
    }
 
+  else{
+    cursor(CROSS);
+  }
 
  
 }

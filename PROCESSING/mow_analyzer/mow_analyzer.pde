@@ -134,7 +134,7 @@ void setup() {
    
   // MOVE INIT
   if (!LIVECAMERA){
-      myMovie = new Movie(this, sketchPath+"MOW_720.mp4");
+      myMovie = new Movie(this, sketchPath+"../VIDEO/AS_MOW_2_720.mp4");
       myMovie.loop();
       opencv = new OpenCV(this, myMovie.width, myMovie.height);
       cvquad = new OpenCV(this, zw, zh);
@@ -444,15 +444,19 @@ void DrawAvgColor(){
 ///////////////////////////////////
 void zoomy(){
   
-  int zx = zzx + marginX;
-  int zy = zzy + marginY;
+  //int zx = zzx + marginX;
+  //int zy = zzy + marginY;
+
+  int zx = mouseX;
+  int zy = mouseY;
+
 
   noFill();
   //noStroke();
   //int randgrey = int(random(30)+20);
   //stroke(1,1,1,randgrey);
   //rect(zx,zy + marginY,zw/2,zh/2);
-  int randwhite = int(random(30)+20);
+  int randwhite = int(random(90)+50);
   stroke(250,250,250,randwhite);
   rect(zx-2,zy-2 + marginY,zw/2 +2,zh/2 +2);
   
@@ -468,9 +472,31 @@ void zoomy(){
  // cvquad.findScharrEdges(OpenCV.HORIZONTAL);
  // cvquad.findCannyEdges(cannyprm1,cannyprm2);
  // cvquad.threshold(10);
-  cvquad.brightness((int)map(mouseX, 0, width, -255, 255));
+ // cvquad.brightness((int)map(mouseX, 0, width, -255, 255));
+ 
+    if (key == '1' ) {
+      cvquad.gray();
+       cvquad.findSobelEdges(1,0);
+   }
+    if (key == '2' ) {
+      cvquad.gray();
+       cvquad.findScharrEdges(OpenCV.HORIZONTAL);
+   }
+    if (key == '3' ) {
+      cvquad.gray();
+       cvquad.findCannyEdges(cannyprm1,cannyprm2);
+   }
+    if (key == '0' ) {
+       cvquad.gray();
+   }
+    if (key == '9' ) {
+       cvquad.threshold(100);
+   }
+   
+   cvquad.brightness(-50);
+  cvquad.dilate();
   int blurSize = 2;
-  cvquad.blur(blurSize);
+  //cvquad.blur(blurSize);
   zq = new PImage(zw,zh);
   zq = cvquad.getSnapshot();
   image(zq,100,(height-zoomarg)/2 ,int(zoomarg),int(zoomarg));
