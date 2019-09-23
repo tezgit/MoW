@@ -1,9 +1,11 @@
 import oscP5.*;
 import netP5.*;
 
-OscP5 oscP5;
+OscP5 oscP5, oscPLite;
 NetAddress myRemoteLocation;
 NetAddress maxAddress;
+NetAddress LiteAddress;
+
 String OSCmsg;
 
 int magnitude;
@@ -23,6 +25,18 @@ void MaxOscOut(float p0, float p1, float p2) {
   
   /* send the message */
   oscP5.send(myMessage, maxAddress); 
+}
+
+/////////////////////////
+void OscLite(float p0, float p1, float p2) {
+  /* create a new osc message object */
+  OscMessage myMessage = new OscMessage("/netpixel/ringall"); 
+  myMessage.add(p0); // add a float to the osc message 
+  myMessage.add(p1); // add a float to the osc message 
+  myMessage.add(p2); // add a float to the osc message     
+  
+  /* send the message */
+  oscPLite.send(myMessage, LiteAddress); 
 }
 
 

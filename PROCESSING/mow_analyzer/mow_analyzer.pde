@@ -3,15 +3,21 @@ import processing.video.*;
 import com.hamoid.*;
 import java.util.*;  // needed for List
 // import at.mukprojects.imageloader.image.*;
-
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.CvType;
+import org.opencv.imgproc.Imgproc;
 
 VideoExport videoExport;
 boolean LIVECAMERA =false;
 boolean newFrame=false;
 
-OpenCV opencv;
+OpenCV opencv, cvquad;
 Histogram grayHist, rHist, gHist, bHist;
-PImage img, sobel, videobuffer;
+PImage imgz, sobel, videobuffer, zoomquad, zq, histMask;
 Capture cam; 
 Movie myMovie;
 boolean mp = true;
@@ -50,7 +56,19 @@ int curredge = 0;
 int cannyprm1 = 10;
 int cannyprm2 = 10;
 
+boolean avgFlag = false;
+
+int zzx = 600;
+int zzy = 300;
+int zw = 200;
+int zh = 200;
+float zoomfactor = 2;
+boolean zoomFlag = false;
+
 boolean recording = false; 
+
+Mat skinHistogram;
+
 
 void setup() {
  // ---- HD SCALED SIZES ------ 
@@ -103,14 +121,23 @@ void setup() {
   // OSC INIT             
   oscP5 = new OscP5(this, 7777);  // start oscP5, listening for incoming messages at port 7777 
   myRemoteLocation = new NetAddress("127.0.0.1", 7777);// address of destination server and port 
-  maxAddress = new NetAddress("127.0.0.1", 8888);// address of destination server and port 
+  maxAddress = new NetAddress("127.0.0.1", 8888);// address of destination server and port  
+  oscPLite = new OscP5(this, 9999);  // start oscP5, listening for incoming messages at port 7777 
+  LiteAddress = new NetAddress("192.168.1.255", 54321);// address of destination server and port 
 
-
+  for(int i=1; i<=3; i++){
+     OscLite(0,0,250);
+     delay(250);
+     OscLite(0,0,0);
+     delay(250);
+  }
+   
   // MOVE INIT
   if (!LIVECAMERA){
       myMovie = new Movie(this, sketchPath+"MOW_720.mp4");
       myMovie.loop();
       opencv = new OpenCV(this, myMovie.width, myMovie.height);
+      cvquad = new OpenCV(this, zw, zh);
       // opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
       
       // Prepare for video recording
@@ -128,7 +155,8 @@ void setup() {
    videobuffer.pixels = myMovie.pixels;  
    videobuffer.updatePixels();
    
-    
+   zoomquad = new PImage(800, 800);
+  
    initBlobby();
    
 }
@@ -175,15 +203,22 @@ void draw() {
 
        if(blobFlag){blobby();} // display BLOBS
        
+       if(avgFlag){ DrawAvgColor();} // display Average Color
+       
+       if(zoomFlag){zoomy();} // display zooming rectangles
+       
        if(helpFlag){displayHelp(); displayVideoPos();} // display HELP
 
-
+ 
           if(recording){
             videoExport.saveFrame();// record video
             //videoExport.saveFrame();// record video
             //videoExport.saveFrame();// record video
             }    
   }
+  
+  
+  
 
 }
 
@@ -191,6 +226,7 @@ void draw() {
 void displayHelp(){
   
   translate(0,0);
+  
   
    // --- HELP window ---
   noStroke();
@@ -310,7 +346,6 @@ void displayContour(){
 
 /////////////////////////////////////////////
 void displayEdges(){
-    
   
   if(curredge == 0){
     opencv.findSobelEdges(1,0);
@@ -362,99 +397,82 @@ void mouseReleased() {
   // myMovie.loop();
 }
 
-/////////////////
-void keyPressed(){
-
-  println(" -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-");
-  println("pressed " + int(key) + " " + keyCode);
-  println(" -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-");
-
-
-  if (keyCode == 80){ // key "p"
-         mp = !(mp);
-         if(mp){
-          myMovie.pause();
-        }
-        else {myMovie.loop(); }
-    }
-  
-  
-    else if (keyCode == 39){ // key arrow RIGHT
-          float newpos=myMovie.time() + myMovie.duration() / jumpunit;
-          if(newpos < myMovie.duration()){
-                 myMovie.jump(newpos);
-          }else{ myMovie.jump(0);}
-          
-        }     
-   
-    
-    else if (keyCode == 37){ // key arrow LEFT
-             float newpos=myMovie.time() - myMovie.duration() / jumpunit;
-          if(newpos > 0){
-                 myMovie.jump(newpos);
-          }else{
-                  myMovie.jump(myMovie.duration() - jumpunit );
-          }
-        
-      }
-  
-    else if (keyCode == 67){ // key "c"
-         contourFlag=!(contourFlag);
-    }
-    
-    else if (keyCode == 69){ // key "e"
-         edgesFlag=!(edgesFlag);
-    }
-    else if (keyCode == 82){ // key "r"
-          myMovie.jump(random(myMovie.duration()));
-    }
-
-    else if (keyCode == 71){ // key "g"
-         histoFlag=!(histoFlag);
-    }
-    
-    else if (keyCode == 73){ // key "i"
-         imgFlag=!(imgFlag);
-    }
-    
-    else if (keyCode == 86){ // key "v"
-         vidposFlag=!(vidposFlag);
-    }
-    
-    else if (keyCode == 72){ // key "h"
-         helpFlag=!(helpFlag);
-         if(helpFlag){showControls();}else{hideControls();}
-    }
-    
-    else if (keyCode == 38){ // key "arrow UP"        
-         if(currblend<blendmodes.length) {currblend++;}
-         else{currblend = 0;}        
-    }
-    
-    else if (keyCode == 40){ // key "arrow UP"        
-         if(currblend>0) {currblend--;}
-         else{currblend =  blendmodes.length;}        
-    }
-
-    
-   else if (key == 48) {  // Key 0 // zero
-      recording=!(recording);    
-      if(recording == false){videoExport.endMovie();}
-    }   
-    
-   else if (key == 'k' ) { // toggle console
-      console = !(console);
-   }
-   
-   else if (key == 'b' ) { // toggle console
-      blobFlag = !(blobFlag);
-   }
- 
-}
 
 
 /////////////////////////////////////////////
 void movieEvent(Movie myMovie) {
   myMovie.read();
  // myMovie.loadPixels(); // Make its pixels[] array available
+}
+
+/////////////////////
+color getAverageColor(PImage img) {
+  img.loadPixels();
+  int r = 0, g = 0, b = 0;
+  for (int i=0; i<img.pixels.length; i++) {
+    color c = img.pixels[i];
+    r += c>>16&0xFF;
+    g += c>>8&0xFF;
+    b += c&0xFF;
+  }
+  r /= img.pixels.length;
+  g /= img.pixels.length;
+  b /= img.pixels.length;
+  return color(r, g, b);
+}
+
+/////////////////////
+void DrawAvgColor(){
+ 
+  color frameColor = getAverageColor(videobuffer);
+  
+
+  int rr = int(red(frameColor));
+  int gg = int(green(frameColor));
+  int bb = int(blue(frameColor));
+  fill(rr,gg,bb); 
+  rect(0, 0, 140, 30); 
+  
+  textFont(f,24);  
+  fill(200,200,200,150); 
+  text(rr + " " + gg + " " + bb, 20, 22); 
+
+  OscLite(rr,gg,bb);
+  
+}
+
+///////////////////////////////////
+void zoomy(){
+  
+  int zx = zzx + marginX;
+  int zy = zzy + marginY;
+
+  noFill();
+  //noStroke();
+  //int randgrey = int(random(30)+20);
+  //stroke(1,1,1,randgrey);
+  //rect(zx,zy + marginY,zw/2,zh/2);
+  int randwhite = int(random(30)+20);
+  stroke(250,250,250,randwhite);
+  rect(zx-2,zy-2 + marginY,zw/2 +2,zh/2 +2);
+  
+  int zoomarg=int(zw*zoomfactor);
+
+ pushMatrix();
+ 
+  zoomquad=myMovie.get(zx,zy,zw/2,zh/2);
+  // cvquad.loadImage(zoomquad);
+  cvquad = new OpenCV(this, zoomquad);
+  cvquad.useColor(RGB);
+ //cvquad.findSobelEdges(1,0);
+ // cvquad.findScharrEdges(OpenCV.HORIZONTAL);
+ // cvquad.findCannyEdges(cannyprm1,cannyprm2);
+ // cvquad.threshold(10);
+  cvquad.brightness((int)map(mouseX, 0, width, -255, 255));
+  int blurSize = 2;
+  cvquad.blur(blurSize);
+  zq = new PImage(zw,zh);
+  zq = cvquad.getSnapshot();
+  image(zq,100,(height-zoomarg)/2 ,int(zoomarg),int(zoomarg));
+  popMatrix();
 }

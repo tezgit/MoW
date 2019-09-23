@@ -1,10 +1,12 @@
 ///////////////////////////////////////////////////////////////////////
-// MoW Kontrol // Memory of Water project //  TeZ V 1.2. 21-08-2019  //
+// MoW Lite  // Memory of Water project //  TeZ V 1.2. 21-09-2019  //
 ///////////////////////////////////////////////////////////////////////
 
 #include "AiEsp32RotaryEncoder.h"
 #include "Arduino.h"
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
+#include <Adafruit_DotStar.h>
+#include <SPI.h> 
 #include "WiFi.h"
 #include <WiFiUdp.h>
 #include <OSCMessage.h>
@@ -36,9 +38,13 @@ int buttonvalue = 0;
 int MOVESTEPS = 10;
 int block = 0;
 
-#define NEOPIXPIN 33 // GPI09 on TTGO  // GPIO17 = TX2 on ESP32 // ex 9
+//#define NEOPIXPIN 33 // GPI09 on TTGO  // GPIO17 = TX2 on ESP32 // ex 9
+//Adafruit_NeoPixel pixels(NUMPIXELS, NEOPIXPIN, NEO_GRB + NEO_KHZ800);
 #define NUMPIXELS 25 //  NeoPixel ring size
-Adafruit_NeoPixel pixels(NUMPIXELS, NEOPIXPIN, NEO_GRB + NEO_KHZ800);
+#define DATAPIN    4
+#define CLOCKPIN   5
+Adafruit_DotStar pixels(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
+
 int pixrand = 0; 
 int rrx, ggx, bbx;
 
@@ -450,7 +456,7 @@ void on_ringall(OSCMessage &msg, int addrOffset) {
 
 
 
-    Serial.println("OSC MESSAGE netpixel/ring" && rr &&" " &&gg  &&" "&& bb );
+//    Serial.println("OSC MESSAGE netpixel/ring" && rr &&" " &&gg  &&" "&& bb );
 
     // assign to global
     rrx = rr;
@@ -459,8 +465,8 @@ void on_ringall(OSCMessage &msg, int addrOffset) {
   
     
     pixrand = false;
-    pixels.clear(); // Set all pixel colors to 'off'
-    for(int nn=0; nn<24;nn++){
+  //  pixels.clear(); // Set all pixel colors to 'off'
+    for(int nn=0; nn<NUMPIXELS;nn++){
         pixels.setPixelColor(nn, pixels.Color(rrx, ggx, bbx));
        // pixels.setPixelColor(nn, pixels.Color(rr, gg, bb));
        // delay(10);
@@ -628,7 +634,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
 
-  pinMode(NEOPIXPIN, OUTPUT);
+  // pinMode(NEOPIXPIN, OUTPUT); only if NEOPIXEL (not DOTSTAR)
   pinMode(PHOTOSTOPIN, INPUT);
   pinMode(SWITCHPIN, INPUT);
   
@@ -652,9 +658,8 @@ void setup() {
   pixels.show();  
   blacky();
 
-  // WiFiConnect(); // connect to Wifi
- 
-  APConnect();
+  WiFiConnect(); // connect to Wifi
+ // APConnect();// create local Access Point
   Udp.begin(rxport);
 
   testring(); // test LEDs
@@ -668,11 +673,11 @@ void setup() {
 ////////////////////////////////////
 void loop() {
 
-  rotary_loop(); // rotary encoder check 
-
-  checkEndstop();
-  checkButtonswitch();
-  
+//  rotary_loop(); // rotary encoder check 
+//
+//  checkEndstop();
+//  checkButtonswitch();
+//  
   osc_message_pump(); // check for OSC messages
   // only if OSC message "rand" = true
   if( pixrand == true){
