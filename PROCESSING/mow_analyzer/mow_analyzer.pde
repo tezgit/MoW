@@ -38,8 +38,8 @@ ArrayList<Contour> contours;
 ArrayList<Contour> polygons;
 boolean contourFlag = false;
 int cdraw = 1;
-int sdraw = 1;
-int ldraw = 0;
+int sdraw = 0;
+int ldraw = 1;
 int threshy = 150;
 boolean trsdir = true;
 
@@ -57,6 +57,13 @@ int cannyprm1 = 10;
 int cannyprm2 = 10;
 
 boolean avgFlag = false;
+
+boolean dataFlag = false;
+int pointsTot;                
+int pointsCurr; 
+float countourApproximation; 
+float[][] datapoints = { {0,1}, {0,1}, {0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1},{0,1}, {0,1} };  
+
 
 int zzx = 600;
 int zzy = 300;
@@ -123,10 +130,10 @@ void setup() {
   myRemoteLocation = new NetAddress("127.0.0.1", 7777);// address of destination server and port 
   maxAddress = new NetAddress("127.0.0.1", 8888);// address of destination server and port  
   oscPLite = new OscP5(this, 9999);  // start oscP5, listening for incoming messages at port 7777 
-  LiteAddress = new NetAddress("192.168.1.255", 54321);// address of destination server and port 
+  LiteAddress = new NetAddress("192.168.10.255", 54321);// address of destination server and port 
 
   for(int i=1; i<=3; i++){
-     OscLite(0,0,250);
+     OscLite(0,250,0);
      delay(250);
      OscLite(0,0,0);
      delay(250);
@@ -134,7 +141,7 @@ void setup() {
    
   // MOVE INIT
   if (!LIVECAMERA){
-      myMovie = new Movie(this, sketchPath+"../VIDEO/AS_MOW_2_720.mp4");
+      myMovie = new Movie(this, sketchPath+"../VIDEO/MOW_3_1080.mp4");
       myMovie.loop();
       opencv = new OpenCV(this, myMovie.width, myMovie.height);
       cvquad = new OpenCV(this, zw, zh);
@@ -158,6 +165,9 @@ void setup() {
    zoomquad = new PImage(800, 800);
   
    initBlobby();
+   
+   countourApproximation = 2;
+   resetContours();
    
 }
 
@@ -191,11 +201,12 @@ void draw() {
   
     if(console){translate(0,0); showConsole();}
  
+       if(edgesFlag){displayEdges();} // display openCV EDGES
+ 
        if(contourFlag){displayContour();} // display openCV CONTOUR
        
   //     translate(marginX,marginY);
                        
-       if(edgesFlag){displayEdges();} // display openCV EDGES
        
        if(vidposFlag){displayVideoPos();} // display video position
        
@@ -207,13 +218,15 @@ void draw() {
        
        if(zoomFlag){zoomy();} // display zooming rectangles
        
+       if(dataFlag){showdatatext();}
+       
        if(helpFlag){displayHelp(); displayVideoPos();} // display HELP
 
- 
+         // RECORD VIDEO HERE
           if(recording){
-            videoExport.saveFrame();// record video
-            //videoExport.saveFrame();// record video
-            //videoExport.saveFrame();// record video
+                for(int frate =1; frate <=3; ++frate){
+                  videoExport.saveFrame();// record video
+                }
             }    
   }
   
@@ -291,10 +304,38 @@ void displayVideoPos(){
   textFont(f,16);
   fill(200,200,200, 250);
   String vidpos = "pos (sec):  " + String.valueOf(myMovie.time());
-  text(vidpos, helpMargin + marginX + 60,  height - helpMargin - 20); 
+ //  text(vidpos, helpMargin + marginX + 60,  height - helpMargin - 20); 
+  
+  datatext(1, vidpos); // show in datatext
  //<>//
 }
 
+////////////////////////////////////////////////////////////////////////////////
+ 
+void resetContours() 
+{
+ // opencv.loadImage( src );           
+ 
+  opencv.gray();                      
+  opencv.blur(5);                     
+  opencv.threshold(60);               
+ 
+  // tutte le operazioni possibili sono elencate e descritte in:
+  // <a href="http://atduskgreg.github.io/opencv-processing/reference/gab/opencv/OpenCV.html" target="_blank" rel="nofollow">http://atduskgreg.github.io/opencv-processing/reference/gab/opencv/OpenCV.html</a> 
+  // [vedi "Method Summary"]
+ 
+  contours = opencv.findContours();  
+ 
+  pointsTot = 0;
+  for (Contour contour : contours) {  
+    contour.setPolygonApproximationFactor(countourApproximation);      
+    pointsTot += contour.getPolygonApproximation().getPoints().size();
+  }
+  //  pointsCurr = pointsTot-1;         
+  pointsCurr = 1;
+}
+ 
+ 
 ////////////////////////
 void displayContour(){
     
@@ -316,30 +357,58 @@ void displayContour(){
           
            stroke(150, 150, 150);
 
+           int threshline = contours.size();
+
+           fill(200,200,200,100);
+           textSize(23);
+           text(threshline, width/2, 50);
+ 
            for (PVector point : contour.getPolygonApproximation().getPoints()) {
            vertex(point.x, point.y);
 
-              
-              if(ldraw > 0){  // DRAW LINES
+
+
+             // line(width/2, 0, point.x, point.y);
+ 
+                    // DATATEXT DISPLAY
+                    int dataline = (threshline % 16 ) + 1;
+                    datatext(dataline, String.valueOf(point.x / point.y));
+                    // DATAPOINTS
+                    datapoints[dataline][0]=point.x;
+                    datapoints[dataline][1]=point.y;
                     stroke(150, 150, 150, random(99)+20);
                     translate(0, 0);
-                    line(width/2, 0, point.x, point.y);
+                    line(width/2, 0, datapoints[dataline][0], datapoints[dataline][1]);
                     
-                  float[] pointarray = point.array();  
-                  int threshline = contours.size();
-                  //      String trs = "threshline: " + String.valueOf(threshline);
-                  //      text(trs, 20, 25);
 
+           //fill(200,0,0,100);
+           //text(datapoints[dataline][0], width/2, 90);
+           //fill(0,200,0,100);
+           //text(datapoints[dataline][1], width/2, 120);
 
-                 }
-            
-          }
+          
+          
+          
+     }
         
         fill(200,200,200,10);
         if(sdraw > 0){  endShape();}
           ///  
     } 
             
+            
+                          
+              if(ldraw > 0){  // DRAW LINES
+                   for(int ll=1; ll<datapoints.length; ll++){                   
+                        //stroke(150, 150, 150, random(99)+20);
+                        //translate(0, 0);
+                        //line(width/2, 0, datapoints[ll][0], datapoints[ll][1]);
+                        //// line(width/2, 0, point.x, point.y);
+                        
+                     }
+                 
+                } 
+                 
     translate(0, 0);
 }
 
@@ -430,14 +499,16 @@ void DrawAvgColor(){
   int rr = int(red(frameColor));
   int gg = int(green(frameColor));
   int bb = int(blue(frameColor));
-  fill(rr,gg,bb); 
-  rect(0, 0, 140, 30); 
-  
+  OscLite(rr,gg,bb); // SEND RGB TO LED FIXTURE
+    
+ /*
+  fill(rr,gg,bb);  
+  rect(0, 0, 140, 30);  
   textFont(f,24);  
   fill(200,200,200,150); 
   text(rr + " " + gg + " " + bb, 20, 22); 
+*/
 
-  OscLite(rr,gg,bb);
   
 }
 
@@ -486,7 +557,7 @@ void zoomy(){
       cvquad.gray();
        cvquad.findCannyEdges(cannyprm1,cannyprm2);
    }
-    if (key == '0' ) {
+    if (key == '8' ) {
        cvquad.gray();
    }
     if (key == '9' ) {

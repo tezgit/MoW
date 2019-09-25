@@ -90,10 +90,17 @@ void keyPressed(){
       avgFlag = !(avgFlag);
    }
 
-   else if (key == 'z' ) { // toggle Average
+   else if (key == 'z' ) { // toggle Zoom
       noCursor();
       zoomFlag = !(zoomFlag);
    }
+
+   else if (key == 'd' ) { // toggle Average
+      dataFlag = !(dataFlag);
+   }
+   
+   
+   
 
   else{
     cursor(CROSS);

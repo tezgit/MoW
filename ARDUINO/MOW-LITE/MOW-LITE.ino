@@ -40,7 +40,7 @@ int block = 0;
 
 //#define NEOPIXPIN 33 // GPI09 on TTGO  // GPIO17 = TX2 on ESP32 // ex 9
 //Adafruit_NeoPixel pixels(NUMPIXELS, NEOPIXPIN, NEO_GRB + NEO_KHZ800);
-#define NUMPIXELS 25 //  NeoPixel ring size
+#define NUMPIXELS 14 //  APA STRIP SIZE 
 #define DATAPIN    4
 #define CLOCKPIN   5
 Adafruit_DotStar pixels(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
@@ -201,6 +201,19 @@ void blacky(){
 }
 
 
+//////////////////////////////////
+void bluey(){
+
+    pixels.clear();
+    delay(100);
+   for(int i=0; i<NUMPIXELS; i++) { // For each pixel...
+      pixels.setPixelColor(i, pixels.Color(0, 0, 255));
+    }
+      pixels.show();  
+      delay(100); 
+}
+
+
 ///////////////////////////////
 void on_motorup(OSCMessage &msg, int addrOffset) {
 
@@ -277,6 +290,60 @@ void on_motorblock(OSCMessage &msg, int addrOffset) {
 
     Serial.println("OSC MESSAGE netmotor/motorblock" + block);
  
+}
+
+
+///////////////////////////////
+void on_mowlite(OSCMessage &msg, int addrOffset) {
+
+    int rr, gg, bb;
+
+    if(msg.isInt(0)){
+      rr = msg.getInt(0);
+    }
+        
+    if(msg.isInt(1)){
+      gg = msg.getInt(1);
+    }
+
+    if(msg.isInt(2)){
+      bb = msg.getInt(2);
+    }
+
+
+    if(msg.isFloat(0)){
+      rr = int(msg.getFloat(0));
+    }
+        
+    if(msg.isFloat(1)){
+      gg =int(msg.getFloat(1));
+    }
+
+    if(msg.isFloat(2)){
+      bb = int(msg.getFloat(2));
+    }
+
+
+
+//    Serial.println("OSC MESSAGE netpixel/ring" && rr &&" " &&gg  &&" "&& bb );
+
+    // assign to global
+    rrx = rr;
+    ggx = gg;
+    bbx = bb;
+  
+    
+    pixrand = false;
+  //  pixels.clear(); // Set all pixel colors to 'off'
+    for(int nn=0; nn<NUMPIXELS;nn++){
+        pixels.setPixelColor(nn, pixels.Color(rrx, ggx, bbx));
+       // pixels.setPixelColor(nn, pixels.Color(rr, gg, bb));
+       // delay(10);
+       // pixels.show();   // Send the updated pixel colors to the hardware.
+
+    }
+    pixels.show();   // Send the updated pixel colors to the hardware.
+
 }
 
 
@@ -535,13 +602,13 @@ void testring(){
   delay(100);
  
   ringcolor(200, 0, 0);
-  delay(1000);
+  delay(500);
   ringcolor(0, 200, 0);
-  delay(1000);
+  delay(500);
   ringcolor(0, 0, 200);
-  delay(1000);
+  delay(500);
   ringcolor(0, 0, 0);
-  delay(1000);
+  delay(500);
   
 }
 
@@ -560,22 +627,23 @@ void osc_message_pump() {
     }
 
     if(!in.hasError()) {
-      in.route("/netpixel/pixel", on_pixel);
-      in.route("/netpixel/ring", on_ring);
-      in.route("/netpixel/ringall", on_ringall);
-      in.route("/netpixel/ring_r", on_ring_r);
-      in.route("/netpixel/ring_g", on_ring_g);
-      in.route("/netpixel/ring_b", on_ring_b);
-      in.route("/netpixel/ring_d", on_ring_d);
-      in.route("/netpixel/ring_w", on_ring_w);
-      in.route("/netpixel/rand", on_rand);
-      in.route("/netmotor/move", on_motormove);
-      in.route("/netmotor/block", on_motorblock);
-      in.route("/netmotor/up", on_motorup);
-      in.route("/netmotor/down", on_motordown);
-      in.route("/netmotor/x5", on_motorx5);
-      in.route("/netmotor/x100", on_motorx100);
-      in.route("/netmotor/x1000", on_motorx1000);     
+      in.route("/mowlite", on_mowlite);
+//      in.route("/netpixel/pixel", on_pixel);
+//      in.route("/netpixel/ring", on_ring);
+//      in.route("/netpixel/ringall", on_ringall);
+//      in.route("/netpixel/ring_r", on_ring_r);
+//      in.route("/netpixel/ring_g", on_ring_g);
+//      in.route("/netpixel/ring_b", on_ring_b);
+//      in.route("/netpixel/ring_d", on_ring_d);
+//      in.route("/netpixel/ring_w", on_ring_w);
+//      in.route("/netpixel/rand", on_rand);
+//      in.route("/netmotor/move", on_motormove);
+//      in.route("/netmotor/block", on_motorblock);
+//      in.route("/netmotor/up", on_motorup);
+//      in.route("/netmotor/down", on_motordown);
+//      in.route("/netmotor/x5", on_motorx5);
+//      in.route("/netmotor/x100", on_motorx100);
+//      in.route("/netmotor/x1000", on_motorx1000);     
     }
 
      Serial.println("OSC MESSAGE RECEIVED");
@@ -658,13 +726,20 @@ void setup() {
   pixels.show();  
   blacky();
 
+  testring(); // test LEDs
+  
   WiFiConnect(); // connect to Wifi
  // APConnect();// create local Access Point
   Udp.begin(rxport);
 
-  testring(); // test LEDs
-  whitey(); // mild white LEDs
-  Motorlooptest(); // test motor
+   // blink blue for net connection confirmation
+   for(int ii=0; ii<=5;ii++){
+        bluey();
+        delay(100);
+        blacky();
+        delay(100);       
+     }
+
 
 }
 
@@ -673,18 +748,18 @@ void setup() {
 ////////////////////////////////////
 void loop() {
 
+  osc_message_pump(); // check for OSC messages
+  
 //  rotary_loop(); // rotary encoder check 
 //
 //  checkEndstop();
 //  checkButtonswitch();
 //  
-  osc_message_pump(); // check for OSC messages
-  // only if OSC message "rand" = true
-  if( pixrand == true){
-    randpix();
-    delay(100);     
-  }
-
+// only if OSC message "rand" = true
+//  if( pixrand == true){
+//    randpix();
+//    delay(100);     
+//  }
 
  // delay(10);
   

@@ -28,9 +28,9 @@ void MaxOscOut(float p0, float p1, float p2) {
 }
 
 /////////////////////////
-void OscLite(float p0, float p1, float p2) {
+void OscLite(int p0, int p1, int p2) {
   /* create a new osc message object */
-  OscMessage myMessage = new OscMessage("/netpixel/ringall"); 
+  OscMessage myMessage = new OscMessage("/mowlite"); 
   myMessage.add(p0); // add a float to the osc message 
   myMessage.add(p1); // add a float to the osc message 
   myMessage.add(p2); // add a float to the osc message     

@@ -9,7 +9,8 @@ boolean blobedgeFlag = true;
 /////////////////////////
 void initBlobby(){
      // init blobs vars
-  blobimg = new PImage(myMovie.width,myMovie.height);
+  // blobimg = new PImage(myMovie.width,myMovie.height);
+  blobimg = new PImage(width,height);
   theBlobDetection = new BlobDetection(blobimg.width, blobimg.height);
   theBlobDetection.setPosDiscrimination(true);
   theBlobDetection.setThreshold(blobthresh); // will detect bright areas whose luminosity > 0.2f;
@@ -18,9 +19,14 @@ void initBlobby(){
 
 /////////////////////////
 void blobby(){
+  translate(0,0);
   
-  blobimg.copy(myMovie, 0, 0, myMovie.width, myMovie.height, 
+//  blobimg.copy(myMovie, 0, 0, myMovie.width, myMovie.height, 
+ //       0, 0, blobimg.width, blobimg.height);
+  
+    blobimg.copy(myMovie, 0, 0, myMovie.width, myMovie.height, 
         0, 0, blobimg.width, blobimg.height);
+
   
   fastblur(blobimg, bloblur);
   theBlobDetection.computeBlobs(blobimg.pixels);
@@ -42,7 +48,7 @@ void drawBlobsAndEdges(boolean drawBlobs, boolean drawEdges)
       {
        strokeWeight(1);
       //  strokeWeight(3);
-        stroke(0,255,0, 100);
+        stroke(200,200,200, 50);
         for (int m=0;m<b.getEdgeNb();m++)
         {
           eA = b.getEdgeVertexA(m);
@@ -59,7 +65,7 @@ void drawBlobsAndEdges(boolean drawBlobs, boolean drawEdges)
       if (drawBlobs)
       {
         strokeWeight(1);
-        stroke(255,0,0);
+        stroke(0,0,250, 200);
         rect(
           b.xMin*width,b.yMin*height,
           b.w*width,b.h*height
